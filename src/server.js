@@ -1,38 +1,50 @@
 // Importación de módulos nativos de Node.js
-import http from "node:http";
+import express from "express";
+import path from "node:path";
+import ticketsRouter from "./routes/tickets.js";
+import { tickets } from "./data/tickets.js";
 
 // Puerto en el que escuchará el servidor.
+const app = express();
 const PORT = process.env.PORT ?? 3000;
 
-const server = http.createServer((req, res) => {
-  res.setHeader("Content-Type", "application/json"); // todo se responde en JSON
+// Middleware - Trae los http en JSON
+app.use(express.json());
 
-  // Salud del servicio
-  if (req.method === "GET" && req.url === "/health") {
-    res.statusCode = 200;
-    res.end(JSON.stringify({ status: "ok" }));
-    return; // cortar para no responder dos veces
-  }
-
-  // Catálogo de libros de ejemplo.
-  if (req.method === "GET" && req.url === "/libros") {
-    res.statusCode = 200;
-    res.end(
-      JSON.stringify([
-        { id: 1, titulo: "Cien años de soledad", disponible: true },
-        { id: 2, titulo: "El Quijote", disponible: false },
-        { id: 3, titulo: "La sombra del viento", disponible: true },
-      ]),
-    );
-    return;
-  }
-
-  // Bienvenida por defecto.
-  res.statusCode = 200;
-  res.end(JSON.stringify({ mensaje: "API de biblioteca", version: "1.0.0" }));
+// Middleware - Trae los http y url
+app.use((req, res, next) => {
+  console.log(`${req.method} ${req.url}`);
+  next();
 });
 
-// Iniciar el servidor en el puerto especificado.
-server.listen(PORT, () => {
+// Vistas EJS
+app.set("view engine", "ejs");
+app.set("views", path.resolve("views"));
+
+// Salud del servicio
+app.get("/health", (req, res) => res.json({ status: "ok" }));
+
+// Vista de tickets
+app.get("/", (req, res) => res.render("index", { tickets }));
+
+// Vista detalle de un ticket
+app.get("/tickets/:id/ver", (req, res) => {
+  const ticket = tickets.find((t) => t.id === Number(req.params.id));
+  res.render("detalle", { ticket });
+});
+
+// API JSON
+app.use("/tickets", ticketsRouter);
+
+//Manejo de errores
+app.use((err, req, res, next) => {
+  console.error(err);
+  res.status(500).json({
+    error: "Algo salió mal",
+  });
+});
+
+//Iniciar el servidor en el puerto especificado.
+app.listen(PORT, () => {
   console.log(`Servidor escuchando en http://localhost:${PORT}`);
 });

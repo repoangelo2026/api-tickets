@@ -1,14 +1,14 @@
 {
-  "name": "api-biblioteca",
+  "name": "api-tickets",
   "version": "1.0.0",
-  "description": "API de gestión de una biblioteca",
+  "description": "API de gestión de tickets",
   "main": "src/server.js",
   "scripts": {
     "start": "node src/server.js",
     "dev": "node --watch src/server.js"
   },
   "keywords": [],
-  "author": "Brayan Diaz C",
+  "author": "Angelo Fortunato",
   "license": "MIT",
   "type": "module",
   "devDependencies": {
@@ -19,6 +19,7 @@
     "webpack-cli": "^7.2.1"
   },
   "dependencies": {
+    "ejs": "^6.0.1",
     "express": "^5.2.1"
   }
 }
